@@ -1,0 +1,10 @@
+# PyTorch is installed by setup.bat first (CUDA or CPU build), then these:
+fastapi>=0.110
+uvicorn>=0.29
+numpy
+scipy
+soundfile
+transformers>=4.57,<5     # the XTTS voice code does not work with transformers 5.x
+coqui-tts>=0.27           # XTTS-v2 voice cloning (Coqui Public Model License, non-commercial)
+pyttsx3                   # last-resort offline voice
+noisereduce               # cleans the saved voice sample before cloning
