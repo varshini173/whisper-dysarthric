@@ -1,0 +1,1 @@
+Put the folder whisper-dysarthric-torgoUASpeech here (it must contain config.json and model.safetensors).

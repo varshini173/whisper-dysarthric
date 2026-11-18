@@ -1,0 +1,13 @@
+{
+  "base_model": "openai/whisper-small",
+  "trained_on": "TORGO + UA-Speech dysarthric (speaker-independent split) + controls",
+  "test_speakers": [
+    "TORGO:F04",
+    "TORGO:M02",
+    "UA:F02",
+    "UA:F03",
+    "UA:M10",
+    "UA:M11"
+  ],
+  "best_val_wer": 28.57142857142857
+}
