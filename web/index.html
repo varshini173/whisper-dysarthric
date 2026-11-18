@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whisper-Dysarthric</title>
+<script>try{var _t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',_t==='light'?'light':'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<style>
+:root,:root[data-theme="dark"]{color-scheme:dark;
+--bg:#0a1114;--bar:#0d171a;--bar-b:#22343a;--surface:#111c20;--surface2:#0d171a;--border:#22343a;--border2:#33494f;--text:#e7f0ee;--muted:#8da4a0;--h1:#f1f7f6;
+--accent:#1f9d88;--accent-h:#25b09a;--accent-d:#5fd3bd;--weak:rgba(47,184,160,.12);--orange:#e8812a;--orange-d:#f09440;
+--orig:#f0a458;--origbg:rgba(232,129,42,.14);--out:#5fd3bd;--outbg:rgba(47,184,160,.14);--in-b:rgba(232,129,42,.35);--out-b:rgba(47,184,160,.35);
+--danger:#e5493a;--dangertxt:#ff8a7a;--recbg:rgba(229,73,58,.12);--msgbg:rgba(229,73,58,.10);--recicon:#ff6b5b;
+--warnbg:rgba(226,170,60,.10);--warnb:#6b5420;--warn:#f0cf85;
+--btn:#172529;--btn-h:#1d3135;--btn-hb:#46636a;--dis-bg:#141f23;--dis-b:#22343a;--dis-t:#5a7069;--ctadis-bg:#3a2c1f;--ctadis-t:#8a7358;
+--sw-off:#3a4d51;--sw-off-t:#c3d3cf;--manage-bg:#0a1417;--big:#8cefda;--tb-border:rgba(95,211,189,.25);--tag-t:#c3d6d2;--result-shadow:0 0 0 4px rgba(47,184,160,.08),0 10px 40px rgba(0,0,0,.35)}
+:root[data-theme="light"]{color-scheme:light;
+--bg:#d6e3de;--bar:#0f3f37;--bar-b:#0f3f37;--surface:#f6faf8;--surface2:#e9f1ee;--border:#bfd0ca;--border2:#9db5ad;--text:#10201c;--muted:#4a5f59;--h1:#0c2e28;
+--accent:#0f6b5c;--accent-h:#0b4d42;--accent-d:#0b4d42;--weak:#d3e8e1;--orange:#c25a0a;--orange-d:#a34b07;
+--orig:#8f4a06;--origbg:#f4dfc6;--out:#0a5f54;--outbg:#c6e6de;--in-b:#e0c6a5;--out-b:#a5d0c6;
+--danger:#b42318;--dangertxt:#b42318;--recbg:#f7dcd8;--msgbg:#fbeceb;--recicon:#d6392b;
+--warnbg:#fbefcf;--warnb:#e2c26a;--warn:#6e4a00;
+--btn:#fff;--btn-h:#d3e8e1;--btn-hb:#9db5ad;--dis-bg:#e3ebe8;--dis-b:#d3dfdb;--dis-t:#94a7a1;--ctadis-bg:#d8c7b6;--ctadis-t:#fff;
+--sw-off:#6f847d;--sw-off-t:#fff;--manage-bg:#dfeae6;--big:#0b4d42;--tb-border:rgba(15,107,92,.2);--tag-t:#2d413b;--result-shadow:0 6px 24px rgba(15,63,55,.12)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+/* top bar */
+.topbar{background:var(--bar);border-bottom:1px solid var(--bar-b)}
+.bar{max-width:1080px;margin:0 auto;padding:0 20px;height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:650;font-size:17px;color:#fff;letter-spacing:.005em}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#2fb8a0,#1a7d6c);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(95,211,189,.35)}
+.logo svg{width:17px;height:17px}
+.status{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:#a9c1bc;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:999px;padding:6px 14px}
+.status i{width:9px;height:9px;border-radius:50%;background:#6b807b;display:inline-block}
+.status.ok i{background:#43d39a;box-shadow:0 0 8px rgba(67,211,154,.7)}.status.err i{background:#ff8a7a}
+main{max-width:1080px;margin:0 auto;padding:30px 20px 70px}
+h1{margin:0 0 4px;font-size:26px;font-weight:700;letter-spacing:-.01em;color:var(--h1)}
+.sub{margin:0 0 6px;color:var(--muted);max-width:700px}
+.eyebrow{display:flex;align-items:center;gap:10px;margin:32px 0 12px;font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-d)}
+.eyebrow::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--orange)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card.input{border-top:3px solid var(--accent)}
+.banner{display:none;background:var(--warnbg);border:1px solid var(--warnb);color:var(--warn);border-radius:10px;padding:10px 14px;margin:14px 0 0;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.grow{flex:1}
+/* buttons */
+.btn{height:42px;padding:0 18px;border-radius:8px;border:1.5px solid var(--border2);background:var(--btn);color:var(--text);font-weight:650;font-size:14.5px;display:inline-flex;align-items:center;gap:8px;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--btn-h);border-color:var(--btn-hb)}
+.btn svg{width:17px;height:17px;flex:none}
+.btn.recb svg{color:var(--recicon)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-h);border-color:var(--accent-h)}
+.btn.cta{background:var(--orange);border-color:var(--orange);color:#fff;height:46px;padding:0 30px;font-size:16px;box-shadow:0 4px 18px rgba(232,129,42,.25)}
+.btn.cta:hover{background:var(--orange-d);border-color:var(--orange-d)}
+.btn.rec{background:var(--danger);border-color:var(--danger);color:#fff}.btn.rec svg{color:#fff}
+.btn:disabled,.btn:disabled:hover{background:var(--dis-bg);border-color:var(--dis-b);color:var(--dis-t);cursor:not-allowed;box-shadow:none}
+.btn.cta:disabled{background:var(--ctadis-bg);border-color:var(--ctadis-bg);color:var(--ctadis-t)}
+.btn .sp{display:none;width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+.btn.busy .sp{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn:focus-visible,.switch:focus-visible,.link:focus-visible,.drop:focus-visible{outline:3px solid #e39b55;outline-offset:2px}
+.link{background:none;border:0;color:var(--accent-d);font-weight:650;font-size:14px;padding:4px 2px;text-decoration:underline;text-underline-offset:3px}
+.link.danger{color:var(--dangertxt)}.link:disabled{color:var(--dis-t);cursor:not-allowed}
+/* file area */
+.drop{margin-top:16px;border:2px dashed var(--border2);background:var(--surface2);border-radius:10px;padding:20px;color:var(--muted);text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--accent-d);background:var(--weak)}
+.drop.filled{border:2px solid var(--accent);background:var(--weak);text-align:left;cursor:default;color:var(--text);padding:14px 16px}
+.drop.recording{border:2px solid var(--danger);background:var(--recbg);color:var(--dangertxt);font-weight:650}
+.filerow{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fileicon{width:40px;height:40px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
+.fileicon svg{width:21px;height:21px}
+.fname{font-weight:700;word-break:break-all;line-height:1.3}
+.fsub{font-size:13px;color:var(--accent-d)}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:999px;padding:2px 10px;margin-left:8px;vertical-align:1px;letter-spacing:.03em}
+.filerow audio{height:36px;flex:1;min-width:200px;max-width:360px}
+.hint{margin-top:10px;color:var(--muted);font-size:13.5px}.hint.ready{color:var(--accent-d);font-weight:700}
+/* options */
+.opts{margin-top:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface2)}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px}
+.opt+.opt,.manage{border-top:1px solid var(--border)}
+.ot{font-weight:700;font-size:14.5px}.od{font-size:13px;color:var(--muted)}
+.ctl{display:flex;align-items:center;gap:16px}
+.switch{width:58px;height:28px;border-radius:14px;border:0;background:var(--sw-off);position:relative;padding:0;flex:none;transition:background .15s}
+.switch::before{content:"OFF";position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:800;color:var(--sw-off-t);letter-spacing:.05em}
+.switch .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::before{content:"ON";left:10px;right:auto;color:#fff}
+.switch[aria-checked="true"] .knob{left:33px}
+.manage{display:none;padding:14px 16px;background:var(--manage-bg);border-radius:0 0 10px 10px}
+.manage.open{display:block}
+.manage p{margin:10px 0 0;color:var(--muted);font-size:13.5px}
+#msg{display:none;color:var(--dangertxt);font-weight:650;margin-top:16px;border:2px solid var(--danger);background:var(--msgbg)}
+#voicewarn{color:var(--warn);font-size:13.5px;margin-top:12px}
+.convertrow{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:18px}
+/* result: the main output, so it gets the strongest treatment */
+.card.result{padding:0;overflow:hidden;border:2px solid var(--accent);box-shadow:var(--result-shadow)}
+.rh{background:var(--accent);color:#fff;padding:10px 20px;font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.rb{padding:20px}
+.textbox{background:var(--weak);border:1px solid var(--tb-border);border-radius:10px;padding:18px 22px}
+.big{font-size:30px;line-height:1.25;font-weight:700;letter-spacing:-.01em;word-break:break-word;color:var(--big)}
+.actions{margin-top:16px}
+.btn.play{height:46px;padding:0 24px;font-size:15.5px}
+#guesses{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gl{font-size:12.5px;color:var(--muted);margin-right:4px;font-weight:600}
+.tag{border:1px solid var(--border2);background:var(--btn);border-radius:6px;padding:2px 9px;font-size:13.5px;color:var(--tag-t)}
+.rf{background:var(--surface2);border-top:1px solid var(--border);padding:16px 20px}
+#meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.stat .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.stat .v{font-size:14.5px;font-weight:650;color:var(--text)}
+/* signal comparison */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.cols{grid-template-columns:1fr}}
+.card.panel{padding:0;overflow:hidden}
+.ph{display:flex;align-items:center;gap:9px;padding:11px 18px;font-weight:700;font-size:13px;letter-spacing:.07em;text-transform:uppercase}
+.in .ph{background:var(--origbg);color:var(--orig)}.out .ph{background:var(--outbg);color:var(--out)}
+.in{border-color:var(--in-b)}.out{border-color:var(--out-b)}
+.ph i{width:11px;height:11px;border-radius:3px;display:inline-block;background:currentColor}
+.pb{padding:6px 18px 18px}
+.label{font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600}
+canvas{width:100%;display:block;border-radius:8px;background:#070c11;border:1px solid #1a2a30}
+#wi,#wo{height:120px}#si,#so{height:200px}
+.panel audio{width:100%;margin-top:12px}
+.barright{display:flex;align-items:center;gap:10px}
+.themebtn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#cfe3dd;font-size:13px;font-weight:650;transition:background .15s}
+.themebtn:hover{background:rgba(255,255,255,.14)}
+.themebtn svg{width:15px;height:15px}
+.themebtn .moon{display:none}
+:root[data-theme="light"] .themebtn .sun{display:none}
+:root[data-theme="light"] .themebtn .moon{display:block}
+.themebtn:focus-visible{outline:3px solid #e39b55;outline-offset:2px}
+.brandsub{font-weight:500;font-size:13px;color:#9fc4bc;margin-left:6px}
+.editrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.editin{flex:1;min-width:220px;height:42px;border-radius:8px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font:inherit;font-size:15px;padding:0 14px}
+.editin:focus-visible{outline:3px solid #e39b55;outline-offset:1px}
+.tag.pick{cursor:pointer}.tag.pick:hover{border-color:var(--accent-d);color:var(--accent-d)}
+@media(max-width:560px){.brandsub{display:none}.status{font-size:12px;padding:5px 10px}.brand{font-size:14px}.themebtn span{display:none}.themebtn{padding:0 9px}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="bar">
+  <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg></span>Whisper-Dysarthric <span class="brandsub">speech clarifier</span></div>
+  <div class="barright">
+    <span id="statusbox" class="status"><i></i><span id="status">Starting&hellip;</span></span>
+    <button id="themeBtn" class="themebtn" type="button" aria-label="Switch theme">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <span id="themeLabel">Light</span>
+    </button>
+  </div>
+</div></div>
+
+<main>
+  <h1>Convert speech</h1>
+  <p class="sub">Record or upload dysarthric speech. A Whisper model fine-tuned on the TORGO and UA-Speech corpora recognises the words, and the app speaks them back in a clear voice &mdash; in a standard voice or your own.</p>
+  <div id="banner" class="banner" role="alert"></div>
+
+  <div class="eyebrow" style="margin-top:22px">Input</div>
+  <section class="card input" aria-label="Input">
+    <div class="row">
+      <button id="recBtn" class="btn recb" disabled>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg><span id="recLabel">Record</span></button>
+      <button id="chooseBtn" class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Choose file</button>
+      <input id="file" type="file" accept="audio/*" hidden>
+    </div>
+
+    <div id="drop" class="drop" tabindex="0" role="button" aria-label="Drop an audio file here, or press to choose one">
+      <div id="dropEmpty">No audio selected. Record, choose a file, or drag &amp; drop one here.</div>
+      <div id="dropFilled" class="filerow" style="display:none">
+        <span class="fileicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg></span>
+        <div><div class="fname"><span id="fname"></span><span class="badge">LOADED</span></div><div class="fsub" id="fsub"></div></div>
+        <audio id="pre" controls></audio>
+        <button id="removeBtn" class="link danger" type="button">Remove</button>
+      </div>
+      <div id="dropRec" style="display:none"></div>
+    </div>
+    <div id="convertHint" class="hint">Choose or record audio to begin.</div>
+
+    <div class="opts">
+      <div class="opt">
+        <div><div class="ot">Match known prompts</div><div class="od">Snap the result to the closest phrase from the prompt list. Turn off for free speech.</div></div>
+        <div class="ctl"><button id="snapChip" class="switch" role="switch" aria-checked="true" aria-label="Match known prompts" type="button"><span class="knob"></span></button></div>
+      </div>
+      <div class="opt">
+        <div><div class="ot">Speak in my voice</div><div class="od" id="voiceLabel">My voice</div><div class="od">Off = standard clear voice (most intelligible). On = sounds like you, but less clear.</div></div>
+        <div class="ctl"><button id="manageChip" class="link" aria-expanded="false" type="button">Manage sample</button>
+          <button id="voiceChip" class="switch" role="switch" aria-checked="true" aria-label="Speak in my voice" type="button"><span class="knob"></span></button></div>
+      </div>
+      <div id="manage" class="manage">
+        <div class="row">
+          <button id="saveVoice" class="btn" type="button" disabled>Save this audio as my voice sample</button>
+          <button id="clearVoice" class="btn" type="button" disabled>Clear sample</button>
+          <span id="voiceinfo" class="hint" style="margin:0"></span>
+        </div>
+        <p>For the best match, save 20&ndash;30 seconds of your clearest speech (quiet room, slow). You can save several recordings and they are combined. With no saved sample, the current recording is used if it is at least 3 seconds long.</p>
+      </div>
+    </div>
+    <div id="voicewarn"></div>
+
+    <div class="convertrow">
+      <button id="convertBtn" class="btn cta" disabled><span class="sp"></span><span id="convertLabel">Convert</span></button>
+    </div>
+  </section>
+
+  <div id="msg" class="card" role="alert"></div>
+
+  <div id="result" style="display:none">
+    <div class="eyebrow">Result</div>
+    <section class="card result" aria-live="polite">
+      <div class="rh">Recognised text</div>
+      <div class="rb">
+        <div class="textbox"><div id="text" class="big"></div></div>
+        <div class="editrow">
+          <input id="editText" class="editin" type="text" aria-label="Correct the words" placeholder="Wrong word? Type the correct text and press Speak">
+          <button id="speakEdit" class="btn" type="button"><span class="sp"></span>Speak this text</button>
+        </div>
+        <div class="row actions">
+          <button id="playClear" class="btn primary play" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Play clear voice</button>
+          <button id="playOrig" class="btn" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Play original</button>
+          <button id="both" class="btn" type="button">Play both</button>
+        </div>
+        <div id="guesses"></div>
+      </div>
+      <div class="rf"><div id="meta"></div></div>
+    </section>
+
+    <div class="eyebrow">Signal comparison</div>
+    <div class="cols">
+      <section class="card panel in"><div class="ph"><i></i>Original input</div><div class="pb">
+        <div class="label">Waveform</div><canvas id="wi"></canvas>
+        <div class="label">Spectrogram (0&ndash;8 kHz)</div><canvas id="si"></canvas>
+        <audio id="ai" controls></audio></div></section>
+      <section class="card panel out"><div class="ph"><i></i>Clear output</div><div class="pb">
+        <div class="label">Waveform</div><canvas id="wo"></canvas>
+        <div class="label">Spectrogram (0&ndash;8 kHz)</div><canvas id="so"></canvas>
+        <audio id="ao" controls></audio></div></section>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let ready = false, busy = false, isRec = false, audioCtx = null, pending = null;   // pending = audio waiting for Convert
+const getCtx = () => audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v === '1'; } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem(k, v ? '1' : '0'); } catch (e) {} } };
+
+// ---------- theme ----------
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  $('themeLabel').textContent = t === 'light' ? 'Dark' : 'Light';
+  $('themeBtn').setAttribute('aria-label', 'Switch to ' + (t === 'light' ? 'dark' : 'light') + ' theme');
+}
+$('themeBtn').onclick = () => {
+  const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  applyTheme(t); try { localStorage.setItem('theme', t); } catch (e) {}
+};
+applyTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+
+// ---------- toggle chips ----------
+function setChip(id, on) { $(id).setAttribute('aria-checked', on ? 'true' : 'false'); }
+const isOn = id => $(id).getAttribute('aria-checked') === 'true';
+setChip('snapChip', store.get('snap', true)); setChip('voiceChip', store.get('useVoice', false));
+$('snapChip').onclick = () => { setChip('snapChip', !isOn('snapChip')); store.set('snap', isOn('snapChip')); };
+$('voiceChip').onclick = () => { setChip('voiceChip', !isOn('voiceChip')); store.set('useVoice', isOn('voiceChip')); };
+$('manageChip').onclick = () => { const o = $('manage').classList.toggle('open'); $('manageChip').setAttribute('aria-expanded', o ? 'true' : 'false'); };
+
+// ---------- status ----------
+async function poll() {
+  try {
+    const h = await (await fetch('/api/health')).json();
+    if (h.state === 'ready') {
+      ready = true; $('statusbox').classList.add('ok');
+      $('status').textContent = `Model ready · ${String(h.device).toUpperCase()} · ${h.lexicon_size} prompts`;
+      $('statusbox').dataset.finetuned = h.finetuned ? '1' : '0';
+      $('statusbox').title = 'Recognizer: ' + h.asr_mode;
+      $('recBtn').disabled = false; updateConvert();
+      if (!h.finetuned) { const b = $('banner'); b.style.display = 'block';
+        b.textContent = 'The trained model was not found, so a generic recognizer is being used and it will often be wrong. Put the trained model folder in models/whisper-dysarthric-torgoUASpeech/ (see README) and restart.'; }
+      if (!h.clone_installed) $('voicewarn').textContent = 'Voice cloning is not installed on this computer yet, so the standard clear voice will be used.';
+      return;
+    }
+    if (h.state === 'error') { $('status').textContent = 'Problem: ' + String(h.message).slice(0, 80); $('statusbox').classList.add('err'); $('statusbox').title = h.message; return; }
+    $('status').textContent = 'Loading models…'; $('statusbox').title = h.message;
+  } catch (e) { $('status').textContent = 'Not connected'; }
+  setTimeout(poll, 1500);
+}
+
+// ---------- audio helpers ----------
+async function decodeToMono(arrayBuf, targetSr) {
+  const buf = await getCtx().decodeAudioData(arrayBuf.slice(0));
+  const len = buf.length, mono = new Float32Array(len);
+  for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) mono[i] += d[i] / buf.numberOfChannels; }
+  if (!targetSr || targetSr === buf.sampleRate) return { x: mono, sr: buf.sampleRate };
+  const off = new OfflineAudioContext(1, Math.ceil(len * targetSr / buf.sampleRate), targetSr);
+  const src = off.createBufferSource(), b2 = off.createBuffer(1, len, buf.sampleRate);
+  b2.copyToChannel(mono, 0); src.buffer = b2; src.connect(off.destination); src.start();
+  return { x: (await off.startRendering()).getChannelData(0).slice(), sr: targetSr };
+}
+function encodeWav(x, sr) {
+  const buf = new ArrayBuffer(44 + x.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + x.length * 2, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, x.length * 2, true);
+  for (let i = 0; i < x.length; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, x[i])) * 32767, true);
+  return new Blob([buf], { type: 'audio/wav' });
+}
+const b64ToBlob = (b64, type) => { const bin = atob(b64), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type }); };
+
+// ---------- waveform + spectrogram (unchanged look) ----------
+function drawWave(canvas, x, color) {
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio, H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  const g = canvas.getContext('2d'); g.clearRect(0, 0, W, H); g.strokeStyle = color; g.lineWidth = 1; g.beginPath();
+  let peak = 1e-6; for (let i = 0; i < x.length; i += 7) peak = Math.max(peak, Math.abs(x[i]));
+  const step = Math.max(1, Math.floor(x.length / W));
+  for (let px = 0; px < W; px++) { let mn = 1, mx = -1; const s = px * step;
+    for (let i = s; i < Math.min(s + step, x.length); i++) { const v = x[i] / peak; if (v < mn) mn = v; if (v > mx) mx = v; }
+    if (mn > mx) continue; g.moveTo(px, H / 2 - mx * H / 2 * .95); g.lineTo(px, H / 2 - mn * H / 2 * .95); }
+  g.stroke();
+}
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; } }
+  for (let len = 2; len <= n; len <<= 1) { const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) { const a = i + k, b = i + k + len / 2, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } }
+}
+function color(t) { t = Math.max(0, Math.min(1, t));
+  const st = [[10, 14, 40], [80, 30, 130], [220, 80, 60], [255, 230, 120]], p = t * 3, i = Math.min(2, Math.floor(p)), f = p - i;
+  return st[i].map((c, k) => Math.round(c + (st[i + 1][k] - c) * f)); }
+function drawSpec(canvas, x, sr) {
+  const N = 512, maxBins = Math.min(N / 2, Math.floor(8000 / sr * N)) || N / 2;
+  const hop = Math.max(Math.floor(sr / 100), Math.floor((x.length - N) / 900) || 1), frames = Math.max(1, Math.floor((x.length - N) / hop) + 1);
+  const win = new Float32Array(N).map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1)));
+  const db = new Float32Array(frames * maxBins); let mx = -1e9; const re = new Float32Array(N), im = new Float32Array(N);
+  for (let f = 0; f < frames; f++) { for (let i = 0; i < N; i++) { re[i] = (x[f * hop + i] || 0) * win[i]; im[i] = 0; } fft(re, im);
+    for (let b = 0; b < maxBins; b++) { const v = 20 * Math.log10(Math.hypot(re[b], im[b]) + 1e-6); db[f * maxBins + b] = v; if (v > mx) mx = v; } }
+  const off = document.createElement('canvas'); off.width = frames; off.height = maxBins;
+  const og = off.getContext('2d'), img = og.createImageData(frames, maxBins);
+  for (let f = 0; f < frames; f++) for (let b = 0; b < maxBins; b++) { const c = color((db[f * maxBins + b] - (mx - 70)) / 70), o = ((maxBins - 1 - b) * frames + f) * 4;
+    img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255; }
+  og.putImageData(img, 0, 0);
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio, H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  const g = canvas.getContext('2d'); g.imageSmoothingEnabled = true; g.drawImage(off, 0, 0, W, H);
+}
+
+// ---------- file area + convert button state ----------
+function showError(m) { busy = false; updateConvert(); $('msg').style.display = 'block'; $('msg').textContent = m; }
+function renderFile(label, secs) {
+  const drop = $('drop');
+  drop.classList.remove('filled', 'recording');
+  $('dropEmpty').style.display = $('dropFilled').style.display = $('dropRec').style.display = 'none';
+  if (isRec) { drop.classList.add('recording'); $('dropRec').style.display = 'block'; }
+  else if (pending) {
+    drop.classList.add('filled'); $('dropFilled').style.display = 'flex';
+    $('fname').textContent = pending.label; $('fsub').textContent = `${pending.secs.toFixed(1)} s · audio loaded, ready to convert`;
+  } else $('dropEmpty').style.display = 'block';
+}
+function updateConvert() {
+  const can = ready && pending && !busy && !isRec;
+  $('convertBtn').disabled = !can; $('convertBtn').classList.toggle('busy', busy);
+  $('convertLabel').textContent = busy ? 'Converting…' : 'Convert';
+  $('saveVoice').disabled = !pending;
+  const h = $('convertHint');
+  h.className = 'hint';
+  if (busy) h.textContent = 'Working on it. This can take a little while on a CPU.';
+  else if (isRec) h.textContent = 'Recording… press Stop when you are done.';
+  else if (!pending) h.textContent = 'Choose or record audio to begin.';
+  else if (!ready) h.textContent = 'Audio is loaded. Waiting for the models to finish loading…';
+  else { h.textContent = 'Audio is loaded. Press Convert.'; h.classList.add('ready'); }
+}
+function clearFile() { pending = null; $('pre').removeAttribute('src'); renderFile(); updateConvert(); }
+
+async function loadAudio(blob, label) {
+  $('result').style.display = 'none'; $('msg').style.display = 'none';
+  try {
+    const { x, sr } = await decodeToMono(await blob.arrayBuffer(), 16000);
+    if (x.length < 1600) { clearFile(); return showError('That audio is too short. Please try again.'); }
+    const wav = encodeWav(x, sr);
+    pending = { x, sr, wav, label, secs: x.length / sr };
+    $('pre').src = URL.createObjectURL(wav); renderFile(); updateConvert();
+  } catch (e) { clearFile(); showError('Could not read that audio: ' + e.message); }
+}
+
+// ---------- result ----------
+async function post(url, opts) { const r = await fetch(url, opts); try { return await r.json(); } catch (e) { return { ok: false, error: 'Bad answer from the app.' }; } }
+
+async function showResult(inputX, inputSr, inputBlob, res) {
+  $('result').style.display = 'block';
+  $('text').textContent = res.text;
+  $('editText').value = res.text;
+  if (!res.edited) {
+    const seen = new Set([res.text]), others = (res.candidates || []).filter(c => !seen.has(c) && seen.add(c)).slice(0, 4);
+    $('guesses').innerHTML = others.length ? '<span class="gl">Other guesses (click to use)</span>' + others.map(c => `<button type="button" class="tag pick">${c.replace(/</g, '&lt;')}</button>`).join('') : '';
+    $('guesses').querySelectorAll('.pick').forEach(b => b.onclick = () => { $('editText').value = b.textContent; speakEdited(); });
+  }
+  const how = res.edited ? 'Text typed / chosen by you' : { exact: 'Matched a known prompt', fuzzy: 'Closest known prompt', none: 'No known prompt matched', off: 'Prompt matching off' }[res.snap];
+  const vtxt = res.voice === 'cloned' ? `Your voice (${res.voice_source})` : `Standard voice (${res.engine || 'tts'})`;
+  const stat = (k, v) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  $('meta').innerHTML = stat('Prompt match', how) + stat('Recognition time', res.edited ? '—' : `${res.asr_seconds} s`) + stat('Output voice', vtxt) + stat('Voice generation', `${res.tts_seconds} s`)
+    + (res.truncated ? stat('Note', 'Recording was cut to 30 s') : '');
+  $('voicewarn').textContent = res.voice_note || '';
+  $('ai').onended = null; $('ai').pause(); $('ao').pause();
+  $('ai').src = URL.createObjectURL(inputBlob);
+  const outBlob = b64ToBlob(res.audio_b64, 'audio/wav'); $('ao').src = URL.createObjectURL(outBlob);
+  drawWave($('wi'), inputX, '#e08a3c'); drawSpec($('si'), inputX, inputSr);
+  const o = await decodeToMono(await outBlob.arrayBuffer());
+  drawWave($('wo'), o.x, '#3dc2ad'); drawSpec($('so'), o.x, o.sr);
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+$('convertBtn').onclick = async () => {
+  if (!ready || !pending || busy) return;
+  busy = true; updateConvert(); $('msg').style.display = 'none';
+  let res;
+  try {
+    res = await post('/api/convert?snap=' + (isOn('snapChip') ? 1 : 0) + '&voice=' + (isOn('voiceChip') ? 1 : 0), { method: 'POST', body: pending.wav });
+  } catch (e) { return showError('Cannot reach the app: ' + e.message); }
+  busy = false; updateConvert();
+  if (!res.ok) return showError(res.error || 'Something went wrong. Please try again.');
+  lastInput = { x: pending.x, sr: pending.sr, wav: pending.wav };
+  try { await showResult(pending.x, pending.sr, pending.wav, res); } catch (e) { showError('Could not show the result: ' + e.message); }
+};
+
+// ---------- correct the words and speak again ----------
+let lastInput = null;
+async function speakEdited() {
+  const text = $('editText').value.trim();
+  if (!text || !lastInput || busy) return;
+  busy = true; updateConvert(); $('speakEdit').classList.add('busy'); $('speakEdit').disabled = true;
+  const res = await post('/api/speak?voice=' + (isOn('voiceChip') ? 1 : 0), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
+    .catch(e => ({ ok: false, error: e.message }));
+  busy = false; updateConvert(); $('speakEdit').classList.remove('busy'); $('speakEdit').disabled = false;
+  if (!res.ok) return showError(res.error || 'Could not speak that text.');
+  res.edited = true;
+  try { await showResult(lastInput.x, lastInput.sr, lastInput.wav, res); $('ao').play().catch(() => {}); } catch (e) { showError('Could not show the result: ' + e.message); }
+}
+$('speakEdit').onclick = speakEdited;
+$('editText').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); speakEdited(); } };
+
+// ---------- inputs ----------
+$('chooseBtn').onclick = () => $('file').click();
+$('file').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadAudio(f, f.name); };
+const drop = $('drop');
+drop.onclick = e => { if (!pending && !isRec && !e.target.closest('button')) $('file').click(); };
+drop.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && !pending && !isRec) { e.preventDefault(); $('file').click(); } };
+['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) loadAudio(f, f.name); });
+$('removeBtn').onclick = clearFile;
+
+let rec = null, chunks = [], tInt = null;
+$('recBtn').onclick = async () => {
+  if (rec) { rec.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    rec = new MediaRecorder(stream); chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); clearInterval(tInt); isRec = false;
+      $('recLabel').textContent = 'Record'; $('recBtn').classList.remove('rec');
+      const blob = new Blob(chunks, { type: rec.mimeType }); rec = null; renderFile(); updateConvert(); loadAudio(blob, 'Your recording'); };
+    rec.start(); const t0 = Date.now(); isRec = true; pending = null; $('result').style.display = 'none'; $('msg').style.display = 'none';
+    $('recLabel').textContent = 'Stop'; $('recBtn').classList.add('rec');
+    const tick = () => $('dropRec').textContent = '● Recording… ' + ((Date.now() - t0) / 1000).toFixed(0) + ' s';
+    tick(); tInt = setInterval(tick, 300); renderFile(); updateConvert();
+  } catch (e) { showError('Microphone not available: ' + e.message + ' (use "Choose audio file" instead).'); }
+};
+$('playClear').onclick = () => { const a = $('ai'), b = $('ao'); a.onended = null; a.pause(); b.currentTime = 0; b.play().catch(() => {}); };
+$('playOrig').onclick = () => { const a = $('ai'), b = $('ao'); a.onended = null; b.pause(); a.currentTime = 0; a.play().catch(() => {}); };
+$('both').onclick = () => { const a = $('ai'), b = $('ao'); b.pause(); a.currentTime = 0; b.currentTime = 0;
+  a.onended = () => { a.onended = null; b.play().catch(() => {}); }; a.play().catch(() => {}); };
+
+// ---------- voice sample ----------
+async function refreshVoice() {
+  try {
+    const v = await (await fetch('/api/voice')).json();
+    $('voiceLabel').textContent = v.has_profile ? `Saved sample · ${v.seconds} s` : 'No sample saved yet. The current recording is used if it is 3 s or longer.';
+    $('voiceinfo').textContent = v.has_profile ? `Saved voice sample: ${v.seconds} s` : 'No voice sample saved yet';
+    $('clearVoice').disabled = !v.has_profile;
+  } catch (e) {}
+}
+$('saveVoice').onclick = async () => {
+  if (!pending) return;
+  $('saveVoice').disabled = true;
+  const res = await post('/api/voice/profile?mode=add', { method: 'POST', body: pending.wav }).catch(e => ({ ok: false, error: e.message }));
+  if (!res.ok) showError(res.error || 'Could not save the voice sample.');
+  else { $('msg').style.display = 'none'; $('voicewarn').textContent = ''; setChip('voiceChip', true); store.set('useVoice', true); }
+  await refreshVoice(); updateConvert();
+};
+$('clearVoice').onclick = async () => {
+  if (!confirm('Delete the saved voice sample?')) return;
+  await post('/api/voice/clear', { method: 'POST', body: '{}' }); await refreshVoice();
+};
+
+renderFile(); updateConvert(); refreshVoice(); poll();
+</script>
+</body>
+</html>
